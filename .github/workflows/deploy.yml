@@ -9,6 +9,9 @@ jobs:
     defaults:
       run:
         working-directory: infrastructure/main
+    permissions:
+      id-token: write
+      contents: read
     steps:
     - uses: actions/checkout@v6
     - uses: hashicorp/setup-terraform@v3
