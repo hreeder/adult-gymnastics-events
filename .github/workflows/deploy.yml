@@ -12,6 +12,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    outputs:
+      bucket-name: ${{ steps.tf-output.outputs.bucket_name }}
     steps:
     - uses: actions/checkout@v6
     - uses: hashicorp/setup-terraform@v3
@@ -19,14 +21,28 @@ jobs:
       with:
         aws-region: eu-west-1
         role-to-assume: arn:aws:iam::268434236731:role/gha-adult-gymnastics-events
-    - run: aws sts get-caller-identity
     - run: terraform init
     - run: terraform plan
+    - id: tf-output
+      run: terraform output
 
-  # buildfe:
-  #   runs-on: ubuntu-latest
-  #   needs: [infra]
-  #   steps:
-  #   - uses: actions/checkout@v5
-  #   - uses: actions/setup-node@v
-  #   - wor
+  buildfe:
+    runs-on: ubuntu-latest
+    needs: [infra]
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+    - uses: actions/checkout@v5
+    - uses: oven-sh/setup-bun@v2
+    - run: bun install
+    - run: bun run build
+    
+    - uses: aws-actions/configure-aws-credentials@v5
+      with:
+        aws-region: eu-west-1
+        role-to-assume: arn:aws:iam::268434236731:role/gha-adult-gymnastics-events
+    - run: aws s3 sync --delete ./dist s3://${{ needs.infra.outputs.bucket-name }}

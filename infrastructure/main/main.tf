@@ -59,3 +59,7 @@ resource "aws_dynamodb_table" "this" {
     type = "S"
   }
 }
+
+output "bucket_name" {
+  value = aws_s3_bucket.this.bucket
+}
