@@ -1,11 +1,14 @@
 import json
 import os
+from decimal import Decimal
 
 import boto3
 
-TABLE = os.environ.get("DDB_TABLE", "adult-gymnastics-events")
-BUCKET = os.environ.get("S3_BUCKET", "adult-gymnastics-competitions-data")
+TABLE = os.environ["DDB_TABLE"]
+BUCKET = os.environ["S3_BUCKET"]
 EVENTS_KEY = os.environ.get("EVENTS_KEY", "events.json")
+
+LOG_ITEMS = os.environ.get("LOG_ITEMS", "false").lower() == "true"
 
 DDB = boto3.resource("dynamodb")
 S3 = boto3.resource("s3")
@@ -24,12 +27,15 @@ def handler(event, context):
         items.extend(response.get("Items", []))
 
     for item in items:
-        if createdAt := item.get("createdAt"):
-            item["createdAt"] = int(createdAt)  # type: ignore
-        if updatedAt := item.get("updatedAt"):
-            item["updatedAt"] = int(updatedAt)  # type: ignore
+        for key, val in item.items():
+            if isinstance(val, Decimal):
+                item[key] = int(val)
 
     data = {"events": items}
+
+    if LOG_ITEMS:
+        print(data)
+
     data = json.dumps(data, separators=(",", ":"))
 
     obj = s3_bucket.Object(EVENTS_KEY)

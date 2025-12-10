@@ -26,7 +26,7 @@
   })
 
   $effect(() => {
-    fetch('/events.json')
+    fetch('/data/events.json')
       .then(response => response.json())
       .then(data => events = data.events.sort((a: Event, b: Event) => {
         return new Date(a.date).getTime() - new Date(b.date).getTime();

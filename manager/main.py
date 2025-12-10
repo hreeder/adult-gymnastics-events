@@ -5,11 +5,10 @@ import sys
 import time
 
 import boto3
+import manager.db as db
 import pandas as pd
 import streamlit as st
 from botocore.exceptions import ClientError
-
-import manager.db as db
 from manager.auth import do_auth
 from manager.config import DATE_FORMAT, IMAGE_BUCKET
 
@@ -35,35 +34,41 @@ if items is None:
     st.stop()
     sys.exit(1)
 
-# Convert items to DataFrame for table display
-df = pd.DataFrame(items)
-df = df[["name", "country", "date", "entriesOpen", "entriesClose"]]
-df.columns = ["Event Name", "Country", "Date", "Entries Open", "Entries Close"]
-df = df.fillna("N/A")
-
-# Display table with selection
-event_selection = st.dataframe(
-    df,
-    width="stretch",
-    on_select="rerun",
-    selection_mode="single-row",
-)
-
-st.write(
-    "Select an event from the table above to edit it, or create a new event below."
-)
-# Event form section
-st.divider()
-
-selected_rows = event_selection.selection.rows
-if selected_rows:
-    selected_idx = list(selected_rows)[0]
-    event = items[selected_idx]
-    st.subheader(f"Edit Event: {event['name']}")
-    form_mode = "edit"
-else:
+if len(items) == 0:
+    st.info("No events found. Please create a new event below.")
     st.subheader("Create New Event")
     form_mode = "create"
+
+else:
+    # Convert items to DataFrame for table display
+    df = pd.DataFrame(items)
+    df = df[["name", "country", "date", "entriesOpen", "entriesClose"]]
+    df.columns = ["Event Name", "Country", "Date", "Entries Open", "Entries Close"]
+    df = df.fillna("N/A")
+
+    # Display table with selection
+    event_selection = st.dataframe(
+        df,
+        width="stretch",
+        on_select="rerun",
+        selection_mode="single-row",
+    )
+
+    st.write(
+        "Select an event from the table above to edit it, or create a new event below."
+    )
+    # Event form section
+    st.divider()
+
+    selected_rows = event_selection.selection.rows
+    if selected_rows:
+        selected_idx = list(selected_rows)[0]
+        event = items[selected_idx]
+        st.subheader(f"Edit Event: {event['name']}")
+        form_mode = "edit"
+    else:
+        st.subheader("Create New Event")
+        form_mode = "create"
 
 
 with st.form("event_form"):
@@ -245,4 +250,4 @@ with st.form("event_form"):
             st.stop()
 
 st.html(f"<small>Logged in as: {st.user.email}</small>")
-st.button("Log out", on_click=st.logout)
+st.button("Log out", on_click=st.logout, type="tertiary")
