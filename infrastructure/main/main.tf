@@ -48,6 +48,27 @@ resource "aws_s3_bucket_website_configuration" "this" {
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "this" {
+  bucket = aws_s3_bucket.this.bucket
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+data "aws_iam_policy_document" "s3_allow_public" {
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.this.arn}/*"]
+  }
+}
+
+resource "aws_s3_bucket_policy" "this" {
+  bucket = aws_s3_bucket.this.bucket
+  policy = data.aws_iam_policy_document.s3_allow_public.json
+}
+
 resource "aws_dynamodb_table" "this" {
   name         = local.name
   billing_mode = "PAY_PER_REQUEST"
