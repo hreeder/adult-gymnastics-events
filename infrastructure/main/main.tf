@@ -37,6 +37,17 @@ resource "aws_s3_bucket" "this" {
   bucket = local.domain
 }
 
+resource "aws_s3_bucket_website_configuration" "this" {
+  bucket = aws_s3_bucket.this.bucket
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "index.html"
+  }
+}
+
 resource "aws_dynamodb_table" "this" {
   name         = local.name
   billing_mode = "PAY_PER_REQUEST"
