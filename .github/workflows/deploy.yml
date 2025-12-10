@@ -23,6 +23,7 @@ jobs:
         role-to-assume: arn:aws:iam::268434236731:role/gha-adult-gymnastics-events
     - run: terraform init
     - run: terraform plan
+    - run: terraform apply -auto-approve
     - id: tf-output
       run: terraform output
 
