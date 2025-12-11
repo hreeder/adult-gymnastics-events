@@ -13,7 +13,7 @@ jobs:
       id-token: write
       contents: read
     outputs:
-      bucket-name: ${{ fromJSON(steps.tf-output.outputs.stdout).bucket_name.value }}
+      bucket-name: ${{ fromJSON(steps.output.outputs.stdout).bucket_name.value }}
     steps:
     - uses: actions/checkout@v6
     - uses: hashicorp/setup-terraform@v3
@@ -24,7 +24,7 @@ jobs:
     - run: terraform init
     - run: terraform plan
     - run: terraform apply -auto-approve
-    - id: tf-output
+    - id: output
       run: terraform output -json
 
   frontend:
