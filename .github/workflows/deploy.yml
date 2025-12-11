@@ -46,4 +46,9 @@ jobs:
       with:
         aws-region: eu-west-1
         role-to-assume: arn:aws:iam::268434236731:role/gha-adult-gymnastics-events
-    - run: aws s3 sync --delete ./dist s3://${{ needs.infra.outputs.bucket-name }}
+    - run: |
+        aws s3 sync \
+          --delete \
+          --exclude data/* \
+          ./dist \
+          s3://${{ needs.infra.outputs.bucket-name }}
