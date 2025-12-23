@@ -164,7 +164,7 @@ with st.form("event_form"):
             try:
                 s3 = boto3.client("s3")
                 ext = "png" if image_file.type == "image/png" else "jpg"
-                image_key = f"event-images/{image_file.file_id}.{ext}"
+                image_key = f"event-images/{event['sk'].replace('#', '_')}/{image_file.file_id}.{ext}"
 
                 s3.upload_fileobj(
                     image_file,
@@ -173,9 +173,7 @@ with st.form("event_form"):
                     ExtraArgs={"ACL": "public-read", "ContentType": image_file.type},
                 )
 
-                event["imageUrl"] = (
-                    f"https://{IMAGE_BUCKET}.s3.amazonaws.com/{image_key}"
-                )
+                event["imageUrl"] = f"/{image_key}"
             except ClientError as e:
                 error_code = e.response.get("Error", {}).get("Code", "Unknown")
                 logger.error(f"S3 upload failed: {error_code} - {e}")
