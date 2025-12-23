@@ -23,4 +23,5 @@ COPY . /app/
 #     uv sync --locked --no-dev
 
 ENV PORT=8080
-CMD ["./entrypoint.sh"]
+# CMD ["./entrypoint.sh"]
+CMD ["streamlit", "run", "main.py", "--server.port=${PORT}", "--server.address=0.0.0.0", "--browser.gatherUsageStats=false"]
