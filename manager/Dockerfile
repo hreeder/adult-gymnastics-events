@@ -22,6 +22,5 @@ COPY . /app/
 # RUN --mount=type=cache,target=/root/.cache/uv \
 #     uv sync --locked --no-dev
 
-ENV PORT=8080
-# CMD ["./entrypoint.sh"]
-CMD ["streamlit", "run", "main.py", "--server.port=${PORT}", "--server.address=0.0.0.0", "--browser.gatherUsageStats=false"]
+EXPOSE 8080
+CMD ["streamlit", "run", "main.py", "--server.port=8080", "--server.address=0.0.0.0", "--browser.gatherUsageStats=false"]

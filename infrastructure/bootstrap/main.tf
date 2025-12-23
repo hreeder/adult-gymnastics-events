@@ -58,3 +58,19 @@ resource "aws_iam_role" "this" {
   name               = "gha-adult-gymnastics-events"
   assume_role_policy = data.aws_iam_policy_document.assume.json
 }
+
+resource "aws_iam_role_policy" "inline" {
+  role   = aws_iam_role.this.name
+  policy = data.aws_iam_policy_document.deploy.json
+}
+
+resource "aws_iam_role_policy_attachment" "attach" {
+  for_each = toset([
+    "AmazonDynamoDBFullAccess",
+    "CloudWatchLogsFullAccess",
+    "AWSLambda_FullAccess",
+    "IAMReadOnlyAccess",
+  ])
+  role       = aws_iam_role.this.name
+  policy_arn = "arn:aws:iam::aws:policy/${each.value}"
+}
