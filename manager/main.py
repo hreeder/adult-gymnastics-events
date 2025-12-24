@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper()))
 logging.getLogger("boto3").setLevel(logging.WARNING)
 logging.getLogger("botocore").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("watchdog").setLevel(logging.WARNING)
 
 
 def date_to_str(dt):
