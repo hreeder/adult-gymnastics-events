@@ -27,6 +27,10 @@ def handler(event, context):
         items.extend(response.get("Items", []))
 
     for item in items:
+        # Strip metadata fields
+        for key in ["updatedBy", "createdBy", "pk", "sk"]:
+            del item[key]
+
         for key, val in item.items():
             if isinstance(val, Decimal):
                 item[key] = int(val)
