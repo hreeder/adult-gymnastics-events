@@ -1,6 +1,10 @@
+import logging
+
 import streamlit as st
 
 from manager.config import ALLOWED_USERS
+
+logger = logging.getLogger(__name__)
 
 
 def do_auth():
@@ -13,6 +17,10 @@ def do_auth():
             "Your Google account email address is not verified. Unable to proceed."
         )
         st.stop()
+
+    logger.info("User logged in: %s", st.user.email)
+    logger.info("Allowed Users: %s", ALLOWED_USERS)
+    logger.info("User allowed: %s", st.user.email in ALLOWED_USERS)
 
     if st.user.email not in ALLOWED_USERS:
         st.error(

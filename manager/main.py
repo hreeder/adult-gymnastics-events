@@ -146,7 +146,6 @@ with st.form("event_form"):
 
     button_label = "Update Event" if form_mode == "edit" else "Create Event"
 
-    st.write("Please note, updates take a minute to reflect on the main page.")
     if st.form_submit_button(button_label):
         if not all([name, country, date]):
             st.error("Please fill in all required fields: Event Name, Country, Date.")
@@ -247,6 +246,10 @@ with st.form("event_form"):
             logger.error(f"Unexpected error saving event: {e}")
             st.error("An unexpected error occurred while saving. Please try again.")
             st.stop()
+
+    st.html(
+        "<small>Please note, updates take a minute to reflect on the main page.</small>"
+    )
 
 st.html(f"<small>Logged in as: {st.user.email}</small>")
 st.button("Log out", on_click=st.logout, type="tertiary")
