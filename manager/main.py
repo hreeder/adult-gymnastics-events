@@ -1,6 +1,7 @@
 import calendar
 import hashlib
 import logging
+import os
 import sys
 import time
 
@@ -13,7 +14,7 @@ from manager.auth import do_auth
 from manager.config import DATE_FORMAT, IMAGE_BUCKET
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper()))
 
 
 def date_to_str(dt):

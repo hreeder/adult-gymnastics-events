@@ -8,19 +8,22 @@ logger = logging.getLogger(__name__)
 
 
 def do_auth():
+    logger.debug("Starting Auth")
+
     if not st.user.is_logged_in:
         st.button("Log in with Google", on_click=st.login, type="primary")
         st.stop()
 
+    logger.debug("User is logged in, checking email verification")
     if not st.user.email_verified:
         st.error(
             "Your Google account email address is not verified. Unable to proceed."
         )
         st.stop()
 
-    logger.info("User logged in: %s", st.user.email)
-    logger.info("Allowed Users: %s", ALLOWED_USERS)
-    logger.info("User allowed: %s", st.user.email in ALLOWED_USERS)
+    logger.debug("User logged in: %s", st.user.email)
+    logger.debug("Allowed Users: %s", ALLOWED_USERS)
+    logger.debug("User allowed: %s", st.user.email in ALLOWED_USERS)
 
     if st.user.email not in ALLOWED_USERS:
         st.error(
