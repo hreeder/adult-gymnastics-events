@@ -14,7 +14,10 @@ from manager.auth import do_auth
 from manager.config import DATE_FORMAT, IMAGE_BUCKET
 
 logger = logging.getLogger(__name__)
+# In main.py (your current setup)
 logging.basicConfig(level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper()))
+logging.getLogger("boto3").setLevel(logging.WARNING)
+logging.getLogger("botocore").setLevel(logging.WARNING)
 
 
 def date_to_str(dt):
