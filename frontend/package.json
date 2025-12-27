@@ -19,6 +19,7 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
-    "@sveltestrap/sveltestrap": "^7.1.0"
+    "@sveltestrap/sveltestrap": "^7.1.0",
+    "svelte-select": "^5.8.3"
   }
 }

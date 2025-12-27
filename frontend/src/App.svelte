@@ -1,27 +1,62 @@
 <script lang="ts">
   import EventItem from './lib/EventItem.svelte'
   import { Button, Container, Input } from '@sveltestrap/sveltestrap'
+  import Select from 'svelte-select'
   import type { Event } from './lib/types'
+  import { onMount } from 'svelte'
+
+  const lsPrefix = 'gym-events-'
 
   let events = $state<Event[]>([])
   
   // UI Elements
   let showFilters = $state(false)
+  let countryOptions = $derived(() => {
+    const eventCountries = Array.from(new Set(events.map(e => e.country)))
+      .sort()
+      .map(country => ({ label: country, value: country }))
+    
+    // Add any previously selected countries not in the event data
+    const selected = (selectedCountries || []).filter(
+      c => !eventCountries.some(opt => opt.value === c.value)
+    )
+    
+    return [...eventCountries, ...selected]
+  });
   
   // Filters
-  let ukIrelandOnly = $state(false)
+  let selectedCountries = $state([])
+
+  // Load selected countries from localStorage on mount (only once)
+  onMount(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(`${lsPrefix}selectedCountries`)
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          if (Array.isArray(parsed)) {
+            selectedCountries = parsed
+          }
+        } catch {}
+      }
+    }
+  })
+
+  // Save selected countries to localStorage whenever they change
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`${lsPrefix}selectedCountries`, JSON.stringify(selectedCountries))
+    }
+  })
 
   const toggleFilters = () => showFilters = !showFilters;
 
   let filteredEvents = $derived(() => {
     let filtered = events
-
-    if (ukIrelandOnly) {
-      filtered = filtered.filter(event => 
-        event.country === 'United Kingdom' || event.country === 'Ireland'
-      )
+    if (selectedCountries && selectedCountries.length > 0) {
+      const selected = selectedCountries.map(c => c.value)
+      filtered = filtered.filter(event => selected.includes(event.country))
     }
-
     return filtered
   })
 
@@ -37,14 +72,22 @@
 <main>
   <Container fluid>
     <h3 class="text-center">Upcoming Adult Gymnastics Events</h3>
-    <p class="text-secondary">This site is intended to showcase events for adult gymnasts in the UK &amp; Ireland.</p>
     <Button block color="primary" class="mb-3" on:click={toggleFilters}>
       Filter
     </Button>
 
+
     {#if showFilters}
       <div class="mb-3">
-        <Input type="switch" label="UK/IE Only" bind:checked={ukIrelandOnly} />
+        <label for="country-select">Countries</label>
+        <Select
+          id="country-select"
+          items={countryOptions()}
+          bind:value={selectedCountries}
+          multiple={true}
+          placeholder="Select countries..."
+        />
+
       </div>
     {/if}
 
