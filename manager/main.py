@@ -148,7 +148,7 @@ with st.form("event_form"):
 
     with imageCol2:
         if existing_image:
-            st.image(existing_image, width=400)
+            st.image(f"https://{IMAGE_BUCKET}/{existing_image}", width=400)
 
     button_label = "Update Event" if form_mode == "edit" else "Create Event"
 
