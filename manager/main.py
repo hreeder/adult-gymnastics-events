@@ -176,7 +176,7 @@ with st.form("event_form"):
                     image_file,
                     IMAGE_BUCKET,
                     image_key,
-                    ExtraArgs={"ACL": "public-read", "ContentType": image_file.type},
+                    ExtraArgs={"ContentType": image_file.type},
                 )
 
                 event["imageUrl"] = f"/{image_key}"
