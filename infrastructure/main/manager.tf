@@ -9,7 +9,7 @@ data "aws_iam_policy_document" "manager" {
 
   statement {
     actions = [
-      "s3:PutItem",
+      "s3:PutObject",
     ]
 
     resources = [
