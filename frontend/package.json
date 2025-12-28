@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@sveltestrap/sveltestrap": "^7.1.0",
+    "marked": "^17.0.1",
     "svelte-select": "^5.8.3"
   }
 }

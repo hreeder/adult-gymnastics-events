@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { marked } from 'marked'
   import type { DateString, Event } from "./types";
 
   interface Props {
@@ -115,7 +116,7 @@
         {/if}
         
         <p class="card-text">
-          {event.details}
+          {@html marked(event.details)}
         </p>
       </div>
       {#if showEntryDates()}
