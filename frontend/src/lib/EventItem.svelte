@@ -111,7 +111,7 @@
           {#each event.disciplines as discipline}
               <span class="badge rounded-pill text-bg-primary">
                 {formatDisciplineText(discipline)}
-              </span>
+              </span> &nbsp;
           {/each}
         {/if}
         
