@@ -8,14 +8,7 @@ export interface Event {
 
   imageUrl?: string
 
-  disciplines?: {
-    fv?: boolean    // Floor & Vault
-    wag?: boolean   // Women's Artistic
-    mag?: boolean   // Men's Artistic
-    tra?: boolean   // Trampoline
-    acro?: boolean  // Acrobatic
-    tum?: boolean   // Tumbling
-  }
+  disciplines?: Array<'fv' | 'wag' | 'mag' | 'tra' | 'acro' | 'tum'>
 
   entriesOpen?: DateString
   entriesClose?: DateString

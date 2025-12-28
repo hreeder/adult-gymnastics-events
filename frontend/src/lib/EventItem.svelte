@@ -107,12 +107,10 @@
         </h6>
         
         {#if event.disciplines}
-          {#each Object.entries(event.disciplines) as [discipline, isActive], index}
-            {#if isActive}
+          {#each event.disciplines as discipline}
               <span class="badge rounded-pill text-bg-primary">
                 {formatDisciplineText(discipline)}
               </span>
-            {/if}
           {/each}
         {/if}
         
