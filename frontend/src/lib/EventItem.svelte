@@ -42,23 +42,29 @@
   type EntryState = "open" | "closed" | "closing-soon" | undefined;
   function getEntryState(): EntryState {
     const now = new Date();
-    if (event.entriesOpen && event.entriesClose) {
-      const openDate = new Date(event.entriesOpen);
-      const closeDate = new Date(event.entriesClose);
-      const timeDiff = closeDate.getTime() - now.getTime();
-      const daysDiff = timeDiff / (1000 * 3600 * 24);
-      
-      if (now < openDate) {
-        return undefined;
-      } else if (now < closeDate && daysDiff <= 30) {
-        return "closing-soon";
-      } else if (now >= openDate && now <= closeDate) {
-        return "open";
-      } else {
-        return "closed";
-      }
+    
+    if (!event.entriesClose) {
+      return undefined;
     }
-    return undefined;
+    
+    const closeDate = new Date(event.entriesClose);
+    const openDate = event.entriesOpen ? new Date(event.entriesOpen) : null;
+    
+    // If entries haven't opened yet
+    if (openDate && now < openDate) {
+      return undefined;
+    }
+    
+    // If entries are closed
+    if (now >= closeDate) {
+      return "closed";
+    }
+    
+    // Check if closing soon (within 14 days)
+    const timeDiff = closeDate.getTime() - now.getTime();
+    const daysDiff = timeDiff / (1000 * 3600 * 24);
+    
+    return daysDiff <= 14 ? "closing-soon" : "open";
   }
 </script>
 
