@@ -50,6 +50,7 @@ jobs:
         aws s3 sync \
           --delete \
           --exclude data/* \
+          --exclude event-images/* \
           ./dist \
           s3://${{ needs.infra.outputs.bucket-name }}
 
