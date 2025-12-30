@@ -28,13 +28,15 @@ data "aws_caller_identity" "current" {}
 
 locals {
   name   = "adult-gymnastics-events"
-  domain = "adultgymnasticsevents.reeder.dev"
+  domain = "adultgymnastics.events"
 
   events_data_key = "data/events.json"
 }
 
 resource "aws_s3_bucket" "this" {
   bucket = local.domain
+  # In place for migration to dedicated domain
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_website_configuration" "this" {
