@@ -94,5 +94,19 @@
     {#each filteredEvents() as event}
       <EventItem {event} />
     {/each}
+
+    <div class="text-center">
+      <small>
+        <span class="text-secondary">Default images by 
+          <a href="https://unsplash.com/photos/pOwltFP-q30" target="_blank" rel="noopener noreferrer">
+            Eugene Lim
+          </a>
+          on
+          <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">
+            Unsplash
+          </a>
+        </span>
+      </small>
+    </div>
   </Container>
 </main>
