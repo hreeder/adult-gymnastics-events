@@ -26,6 +26,7 @@
   
   // Filters
   let selectedCountries = $state([])
+  let eventTypeFilter: 'all' | 'competition' | 'workshop' = $state('all');
 
   // Load selected countries from localStorage on mount (only once)
   onMount(() => {
@@ -48,6 +49,8 @@
       localStorage.setItem(`${lsPrefix}selectedCountries`, JSON.stringify(selectedCountries))
     }
   })
+  
+  $effect(() => {console.log(eventTypeFilter)});
 
   const toggleFilters = () => showFilters = !showFilters;
 
@@ -56,6 +59,10 @@
     if (selectedCountries && selectedCountries.length > 0) {
       const selected = selectedCountries.map(c => c.value)
       filtered = filtered.filter(event => selected.includes(event.country))
+    }
+
+    if (eventTypeFilter && eventTypeFilter !== 'all') {
+      filtered = filtered.filter(event => event.eventType === eventTypeFilter)
     }
     return filtered
   })
@@ -88,6 +95,13 @@
           placeholder="Select countries..."
         />
 
+      </div>
+
+      <div class="mb-3">
+        <label for="event-type-filter">Event Type</label>
+          {#each ['all', 'competition', 'workshop'] as value}
+            <Input type="radio" theme="dark" bind:group={eventTypeFilter} {value} label={value.charAt(0).toUpperCase() + value.slice(1)} />
+          {/each}
       </div>
     {/if}
 
