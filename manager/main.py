@@ -55,7 +55,7 @@ else:
     # Display table with selection
     event_selection = st.dataframe(
         df,
-        use_container_width=True,
+        width='stretch',
         on_select="rerun",
         selection_mode="multi-row",
     )
