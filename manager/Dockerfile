@@ -15,4 +15,4 @@ COPY . /app/
 RUN uv sync --locked --no-dev
 
 EXPOSE 8080
-CMD ["streamlit", "run", "main.py", "--server.port=8080", "--server.address=0.0.0.0", "--browser.gatherUsageStats=false"]
+CMD ["uv", "run", "streamlit", "run", "main.py", "--server.port=8080", "--server.address=0.0.0.0", "--browser.gatherUsageStats=false"]
