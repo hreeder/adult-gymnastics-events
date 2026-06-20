@@ -7,7 +7,6 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock .python-version /app/
 
-ENV UV_SYSTEM_PYTHON=1
 RUN uv sync --locked --no-dev --no-install-project
 
 COPY . /app/
@@ -15,4 +14,4 @@ COPY . /app/
 RUN uv sync --locked --no-dev
 
 EXPOSE 8080
-CMD ["uv", "run", "streamlit", "run", "main.py", "--server.port=8080", "--server.address=0.0.0.0", "--browser.gatherUsageStats=false"]
+CMD ["/app/.venv/bin/streamlit", "run", "main.py", "--server.port=8080", "--server.address=0.0.0.0", "--browser.gatherUsageStats=false"]
