@@ -55,7 +55,7 @@ else:
     # Display table with selection
     event_selection = st.dataframe(
         df,
-        width="stretch",
+        use_container_width=True,
         on_select="rerun",
         selection_mode="single-row",
     )
@@ -106,7 +106,7 @@ with st.form("event_form"):
             "Minimum Age",
             min_value=0,
             max_value=100,
-            value=event.get("minAge", None),
+            value=event.get("minimumAge", None),
         )
 
     with upperCol2:
@@ -232,6 +232,7 @@ with st.form("event_form"):
             logger.info(
                 f"Event {'updated' if form_mode == 'edit' else 'created'}: {name} by {st.user.email}"
             )
+            st.rerun()
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "Unknown")
             logger.error(f"DynamoDB put_item failed: {error_code} - {e}")
@@ -256,6 +257,29 @@ with st.form("event_form"):
     st.html(
         "<small>Please note, updates take a minute to reflect on the main page.</small>"
     )
+
+if form_mode == "edit":
+    st.divider()
+    event_to_delete = items[list(selected_rows)[0]]
+
+    if st.session_state.get("confirm_delete_sk") == event_to_delete["sk"]:
+        st.warning(f"Are you sure you want to delete **{event_to_delete['name']}**? This cannot be undone.")
+        col1, col2 = st.columns([1, 6])
+        with col1:
+            if st.button("Yes, delete", type="primary"):
+                if db.delete_item(event_to_delete["pk"], event_to_delete["sk"]):
+                    st.session_state.pop("confirm_delete_sk", None)
+                    logger.info(f"Event deleted: {event_to_delete['name']} by {st.user.email}")
+                    st.success("Event deleted successfully!")
+                    st.rerun()
+        with col2:
+            if st.button("Cancel"):
+                st.session_state.pop("confirm_delete_sk", None)
+                st.rerun()
+    else:
+        if st.button("Delete Event", type="tertiary"):
+            st.session_state["confirm_delete_sk"] = event_to_delete["sk"]
+            st.rerun()
 
 st.html(f"<small>Logged in as: {st.user.email}</small>")
 st.button("Log out", on_click=st.logout, type="tertiary")

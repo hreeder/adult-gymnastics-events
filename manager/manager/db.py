@@ -25,6 +25,25 @@ def get_table():
         st.stop()
 
 
+def delete_item(pk, sk):
+    tbl = get_table()
+    if not tbl:
+        return False
+
+    try:
+        tbl.delete_item(Key={"pk": pk, "sk": sk})
+        return True
+    except ClientError as e:
+        error_code = e.response.get("Error", {}).get("Code", "Unknown")
+        logger.error(f"DynamoDB delete_item failed: {error_code} - {e}")
+        st.error("Failed to delete event. Please try again.")
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error deleting event: {e}")
+        st.error("An unexpected error occurred while deleting. Please try again.")
+        return False
+
+
 def get_items():
     tbl = get_table()
     if not tbl:
