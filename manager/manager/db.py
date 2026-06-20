@@ -25,6 +25,27 @@ def get_table():
         st.stop()
 
 
+def delete_items(items):
+    tbl = get_table()
+    if not tbl:
+        return False
+
+    try:
+        with tbl.batch_writer() as writer:
+            for item in items:
+                writer.delete_item(Key={"pk": item["pk"], "sk": item["sk"]})
+        return True
+    except ClientError as e:
+        error_code = e.response.get("Error", {}).get("Code", "Unknown")
+        logger.error(f"DynamoDB batch delete failed: {error_code} - {e}")
+        st.error("Failed to delete events. Please try again.")
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error batch deleting events: {e}")
+        st.error("An unexpected error occurred while deleting. Please try again.")
+        return False
+
+
 def delete_item(pk, sk):
     tbl = get_table()
     if not tbl:

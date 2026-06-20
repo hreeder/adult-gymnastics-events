@@ -57,229 +57,264 @@ else:
         df,
         use_container_width=True,
         on_select="rerun",
-        selection_mode="single-row",
+        selection_mode="multi-row",
     )
-
-    st.write(
-        "Select an event from the table above to edit it, or create a new event below."
-    )
-    # Event form section
-    st.divider()
 
     selected_rows = event_selection.selection.rows
-    if selected_rows:
-        selected_idx = list(selected_rows)[0]
+    if len(selected_rows) > 1:
+        st.write(f"{len(selected_rows)} events selected.")
+        form_mode = "multi"
+    elif len(selected_rows) == 1:
+        selected_idx = selected_rows[0]
         event = items[selected_idx]
+        st.write(
+            "Select an event from the table above to edit it, or create a new event below."
+        )
+        st.divider()
         st.subheader(f"Edit Event: {event['name']}")
         form_mode = "edit"
     else:
+        st.write(
+            "Select an event from the table above to edit it, or create a new event below."
+        )
+        st.divider()
         st.subheader("Create New Event")
         form_mode = "create"
 
 
-with st.form("event_form"):
-    if form_mode == "edit":
-        selected_idx = list(selected_rows)[0]
-        event = items[selected_idx]
-    else:
-        event = {}
+if form_mode != "multi":
+    with st.form("event_form"):
+        if form_mode == "edit":
+            selected_idx = list(selected_rows)[0]
+            event = items[selected_idx]
+        else:
+            event = {}
 
-    upperCol1, upperCol2 = st.columns(2)
-    with upperCol1:
-        name = st.text_input("Event Name*", value=event.get("name", ""))
+        upperCol1, upperCol2 = st.columns(2)
+        with upperCol1:
+            name = st.text_input("Event Name*", value=event.get("name", ""))
 
-        countries = ["United Kingdom", "United States", "Ireland"]
-        existing_country = event.get("country", "")
-        existing_country_index = (
-            countries.index(existing_country) if existing_country in countries else None
+            countries = ["United Kingdom", "United States", "Ireland"]
+            existing_country = event.get("country", "")
+            existing_country_index = (
+                countries.index(existing_country) if existing_country in countries else None
+            )
+            country = st.selectbox(
+                "Country*",
+                countries,
+                index=existing_country_index,
+                accept_new_options=True,
+            )
+
+            date = st.date_input("Date*", value=event.get("date", None), format=DATE_FORMAT)
+
+            min_age = st.number_input(
+                "Minimum Age",
+                min_value=0,
+                max_value=100,
+                value=event.get("minimumAge", None),
+            )
+
+        with upperCol2:
+            event_types = ["competition", "workshop", "other"]
+            current_type = event.get("eventType", "")
+            current_type_index = (
+                event_types.index(current_type) if current_type in event_types else None
+            )
+            event_type = st.selectbox("Event Type", event_types, index=current_type_index)
+
+            entries_open = st.date_input(
+                "Entries Open", value=event.get("entriesOpen", None), format=DATE_FORMAT
+            )
+
+            entries_close = st.date_input(
+                "Entries Close", value=event.get("entriesClose", None), format=DATE_FORMAT
+            )
+
+            disciplines = st.pills(
+                "Discipline(s)",
+                options=["wag", "mag", "tum", "fv", "tra", "acro"],
+                selection_mode="multi",
+                default=event.get("disciplines", []),
+            )
+
+        details = st.text_area(
+            "Event Details (Markdown supported)",
+            value=event.get("details", ""),
+            height=200,
         )
-        country = st.selectbox(
-            "Country*",
-            countries,
-            index=existing_country_index,
-            accept_new_options=True,
-        )
 
-        date = st.date_input("Date*", value=event.get("date", None), format=DATE_FORMAT)
+        imageCol1, imageCol2 = st.columns(2)
 
-        min_age = st.number_input(
-            "Minimum Age",
-            min_value=0,
-            max_value=100,
-            value=event.get("minimumAge", None),
-        )
+        existing_image = event.get("imageUrl")
+        uploadText = "Replace Event Image" if existing_image else "Set Event Image"
 
-    with upperCol2:
-        event_types = ["competition", "workshop", "other"]
-        current_type = event.get("eventType", "")
-        current_type_index = (
-            event_types.index(current_type) if current_type in event_types else None
-        )
-        event_type = st.selectbox("Event Type", event_types, index=current_type_index)
+        with imageCol1:
+            image_file = st.file_uploader(uploadText, type=["png", "jpg", "jpeg"])
 
-        entries_open = st.date_input(
-            "Entries Open", value=event.get("entriesOpen", None), format=DATE_FORMAT
-        )
+        with imageCol2:
+            if existing_image:
+                st.image(f"https://{IMAGE_BUCKET}{existing_image}", width=400)
 
-        entries_close = st.date_input(
-            "Entries Close", value=event.get("entriesClose", None), format=DATE_FORMAT
-        )
+        button_label = "Update Event" if form_mode == "edit" else "Create Event"
 
-        disciplines = st.pills(
-            "Discipline(s)",
-            options=["wag", "mag", "tum", "fv", "tra", "acro"],
-            selection_mode="multi",
-            default=event.get("disciplines", []),
-        )
+        if st.form_submit_button(button_label):
+            if not all([name, country, date]):
+                st.error("Please fill in all required fields: Event Name, Country, Date.")
+                st.stop()
 
-    details = st.text_area(
-        "Event Details (Markdown supported)",
-        value=event.get("details", ""),
-        height=200,
-    )
+            if form_mode == "create":
+                event["pk"] = "event"
+                # Generate sk from date + hash of event name
+                name_hash = hashlib.sha256(name.encode()).hexdigest()[:8]
+                sk = calendar.timegm(date.timetuple())
+                event["sk"] = f"{sk}#{name_hash}"
+                event["createdBy"] = st.user.email
+                event["createdAt"] = int(time.time())
 
-    imageCol1, imageCol2 = st.columns(2)
+            if image_file:
+                try:
+                    s3 = boto3.client("s3")
+                    ext = "png" if image_file.type == "image/png" else "jpg"
+                    image_key = f"event-images/{event['sk'].replace('#', '_')}/{image_file.file_id}.{ext}"
 
-    existing_image = event.get("imageUrl")
-    uploadText = "Replace Event Image" if existing_image else "Set Event Image"
+                    s3.upload_fileobj(
+                        image_file,
+                        IMAGE_BUCKET,
+                        image_key,
+                        ExtraArgs={"ContentType": image_file.type},
+                    )
 
-    with imageCol1:
-        image_file = st.file_uploader(uploadText, type=["png", "jpg", "jpeg"])
+                    event["imageUrl"] = f"/{image_key}"
+                except ClientError as e:
+                    error_code = e.response.get("Error", {}).get("Code", "Unknown")
+                    logger.error(f"S3 upload failed: {error_code} - {e}")
+                    if error_code == "NoSuchBucket":
+                        st.error(
+                            f"Storage bucket '{IMAGE_BUCKET}' not found. Please contact support."
+                        )
+                    elif error_code == "AccessDenied":
+                        st.error(
+                            "Permission denied for image upload. Please contact support."
+                        )
+                    else:
+                        st.error("Failed to upload image. Please try again.")
+                    st.stop()
+                except Exception as e:
+                    logger.error(f"Unexpected error uploading image: {e}")
+                    st.error("Failed to upload image. Please try again.")
+                    st.stop()
 
-    with imageCol2:
-        if existing_image:
-            st.image(f"https://{IMAGE_BUCKET}{existing_image}", width=400)
-
-    button_label = "Update Event" if form_mode == "edit" else "Create Event"
-
-    if st.form_submit_button(button_label):
-        if not all([name, country, date]):
-            st.error("Please fill in all required fields: Event Name, Country, Date.")
-            st.stop()
-
-        if form_mode == "create":
-            event["pk"] = "event"
-            # Generate sk from date + hash of event name
-            name_hash = hashlib.sha256(name.encode()).hexdigest()[:8]
-            sk = calendar.timegm(date.timetuple())
-            event["sk"] = f"{sk}#{name_hash}"
-            event["createdBy"] = st.user.email
-            event["createdAt"] = int(time.time())
-
-        if image_file:
             try:
-                s3 = boto3.client("s3")
-                ext = "png" if image_file.type == "image/png" else "jpg"
-                image_key = f"event-images/{event['sk'].replace('#', '_')}/{image_file.file_id}.{ext}"
+                tbl = db.get_table()
+                if not tbl:
+                    # again, if we haven't been able to get the table, we'd have exited already, but
+                    # this keeps the linters happy
+                    sys.exit(1)
 
-                s3.upload_fileobj(
-                    image_file,
-                    IMAGE_BUCKET,
-                    image_key,
-                    ExtraArgs={"ContentType": image_file.type},
+                tbl.put_item(
+                    Item={
+                        **event,
+                        "name": name,
+                        "country": country,
+                        "eventType": event_type,
+                        "date": date_to_str(date),
+                        "entriesOpen": date_to_str(entries_open),
+                        "entriesClose": date_to_str(entries_close),
+                        "disciplines": disciplines,
+                        "details": details,
+                        "minimumAge": min_age,
+                        "updatedBy": st.user.email,
+                        "updatedAt": int(time.time()),
+                    }
                 )
 
-                event["imageUrl"] = f"/{image_key}"
+                success_msg = (
+                    "Event updated successfully!"
+                    if form_mode == "edit"
+                    else "Event created successfully!"
+                )
+                st.success(success_msg)
+                logger.info(
+                    f"Event {'updated' if form_mode == 'edit' else 'created'}: {name} by {st.user.email}"
+                )
+                st.rerun()
             except ClientError as e:
                 error_code = e.response.get("Error", {}).get("Code", "Unknown")
-                logger.error(f"S3 upload failed: {error_code} - {e}")
-                if error_code == "NoSuchBucket":
+                logger.error(f"DynamoDB put_item failed: {error_code} - {e}")
+                if error_code == "ConditionalCheckFailedException":
                     st.error(
-                        f"Storage bucket '{IMAGE_BUCKET}' not found. Please contact support."
+                        "Event was modified by another user. Please refresh and try again."
                     )
-                elif error_code == "AccessDenied":
+                elif error_code == "ProvisionedThroughputExceededException":
                     st.error(
-                        "Permission denied for image upload. Please contact support."
+                        "Service is currently busy. Please try again in a few moments."
                     )
+                elif error_code == "ValidationException":
+                    st.error("Invalid data provided. Please check your inputs.")
                 else:
-                    st.error("Failed to upload image. Please try again.")
+                    st.error("Failed to save event. Please try again.")
                 st.stop()
             except Exception as e:
-                logger.error(f"Unexpected error uploading image: {e}")
-                st.error("Failed to upload image. Please try again.")
+                logger.error(f"Unexpected error saving event: {e}")
+                st.error("An unexpected error occurred while saving. Please try again.")
                 st.stop()
 
-        try:
-            tbl = db.get_table()
-            if not tbl:
-                # again, if we haven't been able to get the table, we'd have exited already, but
-                # this keeps the linters happy
-                sys.exit(1)
+        st.html(
+            "<small>Please note, updates take a minute to reflect on the main page.</small>"
+        )
 
-            tbl.put_item(
-                Item={
-                    **event,
-                    "name": name,
-                    "country": country,
-                    "eventType": event_type,
-                    "date": date_to_str(date),
-                    "entriesOpen": date_to_str(entries_open),
-                    "entriesClose": date_to_str(entries_close),
-                    "disciplines": disciplines,
-                    "details": details,
-                    "minimumAge": min_age,
-                    "updatedBy": st.user.email,
-                    "updatedAt": int(time.time()),
-                }
-            )
+    if form_mode == "edit":
+        st.divider()
+        event_to_delete = items[list(selected_rows)[0]]
 
-            success_msg = (
-                "Event updated successfully!"
-                if form_mode == "edit"
-                else "Event created successfully!"
-            )
-            st.success(success_msg)
-            logger.info(
-                f"Event {'updated' if form_mode == 'edit' else 'created'}: {name} by {st.user.email}"
-            )
-            st.rerun()
-        except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "Unknown")
-            logger.error(f"DynamoDB put_item failed: {error_code} - {e}")
-            if error_code == "ConditionalCheckFailedException":
-                st.error(
-                    "Event was modified by another user. Please refresh and try again."
-                )
-            elif error_code == "ProvisionedThroughputExceededException":
-                st.error(
-                    "Service is currently busy. Please try again in a few moments."
-                )
-            elif error_code == "ValidationException":
-                st.error("Invalid data provided. Please check your inputs.")
-            else:
-                st.error("Failed to save event. Please try again.")
-            st.stop()
-        except Exception as e:
-            logger.error(f"Unexpected error saving event: {e}")
-            st.error("An unexpected error occurred while saving. Please try again.")
-            st.stop()
+        if st.session_state.get("confirm_delete_sk") == event_to_delete["sk"]:
+            st.warning(f"Are you sure you want to delete **{event_to_delete['name']}**? This cannot be undone.")
+            col1, col2 = st.columns([1, 6])
+            with col1:
+                if st.button("Yes, delete", type="primary"):
+                    if db.delete_item(event_to_delete["pk"], event_to_delete["sk"]):
+                        st.session_state.pop("confirm_delete_sk", None)
+                        logger.info(f"Event deleted: {event_to_delete['name']} by {st.user.email}")
+                        st.success("Event deleted successfully!")
+                        st.rerun()
+            with col2:
+                if st.button("Cancel"):
+                    st.session_state.pop("confirm_delete_sk", None)
+                    st.rerun()
+        else:
+            if st.button("Delete Event", type="tertiary"):
+                st.session_state["confirm_delete_sk"] = event_to_delete["sk"]
+                st.rerun()
 
-    st.html(
-        "<small>Please note, updates take a minute to reflect on the main page.</small>"
-    )
-
-if form_mode == "edit":
+else:
     st.divider()
-    event_to_delete = items[list(selected_rows)[0]]
+    selected_events = [items[i] for i in selected_rows]
 
-    if st.session_state.get("confirm_delete_sk") == event_to_delete["sk"]:
-        st.warning(f"Are you sure you want to delete **{event_to_delete['name']}**? This cannot be undone.")
+    if st.session_state.get("confirm_bulk_delete"):
+        st.warning(
+            f"Are you sure you want to delete **{len(selected_events)} events**? This cannot be undone."
+        )
         col1, col2 = st.columns([1, 6])
         with col1:
-            if st.button("Yes, delete", type="primary"):
-                if db.delete_item(event_to_delete["pk"], event_to_delete["sk"]):
-                    st.session_state.pop("confirm_delete_sk", None)
-                    logger.info(f"Event deleted: {event_to_delete['name']} by {st.user.email}")
-                    st.success("Event deleted successfully!")
+            if st.button("Yes, delete all", type="primary"):
+                if db.delete_items(selected_events):
+                    st.session_state.pop("confirm_bulk_delete", None)
+                    names = ", ".join(e["name"] for e in selected_events)
+                    logger.info(
+                        f"{len(selected_events)} events deleted by {st.user.email}: {names}"
+                    )
+                    st.success(f"{len(selected_events)} events deleted successfully!")
                     st.rerun()
         with col2:
             if st.button("Cancel"):
-                st.session_state.pop("confirm_delete_sk", None)
+                st.session_state.pop("confirm_bulk_delete", None)
                 st.rerun()
     else:
-        if st.button("Delete Event", type="tertiary"):
-            st.session_state["confirm_delete_sk"] = event_to_delete["sk"]
+        if st.button(f"Delete {len(selected_events)} Events", type="tertiary"):
+            st.session_state["confirm_bulk_delete"] = True
             st.rerun()
+
 
 st.html(f"<small>Logged in as: {st.user.email}</small>")
 st.button("Log out", on_click=st.logout, type="tertiary")
