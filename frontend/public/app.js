@@ -1,5 +1,5 @@
 const LS_PREFIX = "gym-events-";
-const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1505619730259-b1288d154955";
+const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1505619730259-b1288d154955?w=640&h=360&fit=crop&auto=format";
 
 let events = [];
 let selectedCountries = new Set(loadSavedCountries());
