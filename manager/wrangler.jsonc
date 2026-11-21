@@ -1,0 +1,41 @@
+// Manager app: Svelte SPA (built to dist/) + API/OAuth worker.
+// Deploy: npx wrangler deploy (from this directory)
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "adult-gymnastics-events-manager",
+  "main": "worker.js",
+  "compatibility_date": "2025-11-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // Without this, navigation requests to /login etc. are answered with
+    // index.html (SPA fallback) and the OAuth routes never run.
+    "run_worker_first": ["/login", "/callback", "/logout", "/api/*"]
+  },
+  "kv_namespaces": [
+    {
+      // Same namespace as the public site worker
+      "binding": "EVENTS",
+      "id": "c56fe9bfa2ab4495bf7eeea0bad6cd7b"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "adult-gymnastics-event-images"
+    }
+  ],
+  // SUPERUSER_EMAIL, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are secrets, not
+  // config, so they stay out of this public repo. Secrets persist across
+  // deploys. The superuser can add further allowed users in the manager UI:
+  //   npx wrangler secret put SUPERUSER_EMAIL
+  //   npx wrangler secret put GOOGLE_CLIENT_ID
+  //   npx wrangler secret put GOOGLE_CLIENT_SECRET
+  "routes": [
+    {
+      "pattern": "manager.adultgymnastics.events",
+      "custom_domain": true
+    }
+  ]
+}

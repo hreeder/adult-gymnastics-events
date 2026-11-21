@@ -1,0 +1,34 @@
+// Public site: static assets + the JSON/image routes in worker.js.
+// Deploy: npx wrangler deploy (from this directory)
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "adult-gymnastics-events",
+  "main": "worker.js",
+  "compatibility_date": "2025-11-01",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "none",
+    "run_worker_first": ["/data/*", "/event-images/*"],
+    "binding": "ASSETS"
+  },
+  "kv_namespaces": [
+    {
+      // Create with: npx wrangler kv namespace create EVENTS
+      "binding": "EVENTS",
+      "id": "c56fe9bfa2ab4495bf7eeea0bad6cd7b"
+    }
+  ],
+  "r2_buckets": [
+    {
+      // Create with: npx wrangler r2 bucket create adult-gymnastics-event-images
+      "binding": "IMAGES",
+      "bucket_name": "adult-gymnastics-event-images"
+    }
+  ],
+  "routes": [
+    {
+      "pattern": "adultgymnastics.events",
+      "custom_domain": true
+    }
+  ]
+}

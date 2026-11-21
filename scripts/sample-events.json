@@ -1,0 +1,78 @@
+{
+  "events": [
+    {
+      "sk": "1772323200#sample01",
+      "name": "Spring Regional Competition",
+      "country": "United Kingdom",
+      "date": "2026-03-14",
+      "eventType": "competition",
+      "entriesOpen": "2026-01-05",
+      "entriesClose": "2026-02-20",
+      "minimumAge": 16,
+      "disciplines": ["wag", "mag", "tum"],
+      "details": "Open regional competition for adult gymnasts of all levels.\n\n- Four-piece apparatus for artistic\n- Tumble track for tumble entries\n- Medals for top three in each age band\n\nEntries close two weeks before the event. **No late entries accepted.**",
+      "createdBy": "sample@data.local",
+      "createdAt": 1764000000,
+      "updatedBy": "sample@data.local",
+      "updatedAt": 1764000000
+    },
+    {
+      "sk": "1774224000#sample02",
+      "name": "Adult Gymnastics Workshop: Back Handspring Bootcamp",
+      "country": "United Kingdom",
+      "date": "2026-04-04",
+      "eventType": "workshop",
+      "entriesClose": "2026-03-21",
+      "disciplines": ["wag", "mag"],
+      "details": "A half-day workshop focused on drills and progressions for back handsprings, suitable for beginners through to those polishing technique.\n\nCoached by qualified artistic coaches. Limited to 24 places.",
+      "createdBy": "sample@data.local",
+      "createdAt": 1764000000,
+      "updatedBy": "sample@data.local",
+      "updatedAt": 1764000000
+    },
+    {
+      "sk": "1776000000#sample03",
+      "name": "Emerald City Adult Open",
+      "country": "United States",
+      "date": "2026-05-09",
+      "eventType": "competition",
+      "entriesOpen": "2026-02-01",
+      "entriesClose": "2026-04-15",
+      "minimumAge": 18,
+      "disciplines": ["wag", "mag", "tra", "acro"],
+      "details": "The largest adult gymnastics meet in the Pacific Northwest, with sessions for all levels from novice to elite-track adults.",
+      "createdBy": "sample@data.local",
+      "createdAt": 1764000000,
+      "updatedBy": "sample@data.local",
+      "updatedAt": 1764000000
+    },
+    {
+      "sk": "1769000000#sample04",
+      "name": "Winter Tumble & Trampoline League",
+      "country": "Ireland",
+      "date": "2026-01-25",
+      "eventType": "competition",
+      "entriesOpen": "2025-11-01",
+      "entriesClose": "2026-01-05",
+      "disciplines": ["tra", "tum"],
+      "details": "Final round of the winter league. Entries are now **closed** — shown here so you can validate how closed entries render.",
+      "createdBy": "sample@data.local",
+      "createdAt": 1764000000,
+      "updatedBy": "sample@data.local",
+      "updatedAt": 1764000000
+    },
+    {
+      "sk": "1777500000#sample05",
+      "name": "Acro Intensive Weekend",
+      "country": "United States",
+      "date": "2026-06-06",
+      "eventType": "workshop",
+      "disciplines": ["acro", "fv"],
+      "details": "Two days of partner acrobatics and floor & vault technique. No entries date set on this one — used to validate events without entry dates.",
+      "createdBy": "sample@data.local",
+      "createdAt": 1764000000,
+      "updatedBy": "sample@data.local",
+      "updatedAt": 1764000000
+    }
+  ]
+}

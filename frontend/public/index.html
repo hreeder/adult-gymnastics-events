@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Upcoming gymnastics competitions and workshops for adult gymnasts." />
+    <title>Upcoming Adult Gymnastics Events</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="site-header">
+        <h1>Upcoming Adult Gymnastics Events</h1>
+        <button id="filter-toggle" class="filter-toggle" aria-expanded="false" aria-controls="filters">
+          Filter events
+        </button>
+      </header>
+
+      <section id="filters" class="filters" hidden>
+        <fieldset class="filter-group">
+          <legend>Countries</legend>
+          <div id="country-filters" class="pill-row"></div>
+        </fieldset>
+        <fieldset class="filter-group">
+          <legend>Options</legend>
+          <div class="pill-row">
+            <label class="pill"><input type="checkbox" id="hide-past" checked /> Hide past events</label>
+          </div>
+        </fieldset>
+        <fieldset class="filter-group">
+          <legend>Event type</legend>
+          <div class="pill-row">
+            <label class="pill"><input type="radio" name="eventType" value="all" checked /> All</label>
+            <label class="pill"><input type="radio" name="eventType" value="competition" /> Competition</label>
+            <label class="pill"><input type="radio" name="eventType" value="workshop" /> Workshop</label>
+          </div>
+        </fieldset>
+      </section>
+
+      <main id="events"></main>
+
+      <footer class="site-footer">
+        <small>
+          Default images by
+          <a href="https://unsplash.com/photos/pOwltFP-q30" target="_blank" rel="noopener noreferrer">Eugene Lim</a>
+          on
+          <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a>
+        </small>
+      </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@15/lib/marked.umd.min.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>

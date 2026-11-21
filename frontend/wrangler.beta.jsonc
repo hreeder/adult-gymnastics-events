@@ -1,0 +1,24 @@
+// Beta deploy config: workers.dev URL, isolated KV namespace + R2 bucket.
+// Deploy: npx wrangler deploy --config wrangler.beta.jsonc
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "adult-gymnastics-events-beta",
+  "main": "worker.js",
+  "compatibility_date": "2025-11-01",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "none",
+    "run_worker_first": ["/data/*", "/event-images/*"],
+    "binding": "ASSETS"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "EVENTS",
+      "id": "c56fe9bfa2ab4495bf7eeea0bad6cd7b"
+    }
+  ],
+  // R2 not yet activated on the account; re-add once enabled:
+  // "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "adult-gymnastics-event-images-beta" }],
+  "r2_buckets": []
+}

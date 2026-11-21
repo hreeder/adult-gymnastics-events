@@ -4,103 +4,25 @@ on:
     branches: [main]
 
 jobs:
-  infra:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: infrastructure/main
-    permissions:
-      id-token: write
-      contents: read
-    outputs:
-      bucket-name: ${{ fromJSON(steps.output.outputs.stdout).bucket_name.value }}
-    steps:
-    - uses: actions/checkout@v6
-    - uses: hashicorp/setup-terraform@v3
-    - uses: aws-actions/configure-aws-credentials@v5
-      with:
-        aws-region: eu-west-1
-        role-to-assume: arn:aws:iam::268434236731:role/gha-adult-gymnastics-events
-    - run: terraform init
-    - run: terraform plan
-    - run: terraform apply -auto-approve
-    - id: output
-      run: terraform output -json
-
   frontend:
     runs-on: ubuntu-latest
-    needs: [infra]
-    permissions:
-      id-token: write
-      contents: read
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-    - uses: actions/checkout@v5
-    - uses: oven-sh/setup-bun@v2
-    - run: bun install
-    - run: bun run build
-    
-    - uses: aws-actions/configure-aws-credentials@v5
-      with:
-        aws-region: eu-west-1
-        role-to-assume: arn:aws:iam::268434236731:role/gha-adult-gymnastics-events
-    - run: |
-        aws s3 sync \
-          --delete \
-          --exclude data/* \
-          --exclude event-images/* \
-          ./dist \
-          s3://${{ needs.infra.outputs.bucket-name }}
-
-  build-and-push-manager:
-    name: Push Manager Image
-    runs-on: ubuntu-latest
-
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}-manager
-
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
-
     steps:
       - uses: actions/checkout@v5
-
-      - uses: astral-sh/setup-uv@v6
-
-      - name: Generate requirements.txt
-        working-directory: manager
-        run: uv export --frozen --no-dev --output-file requirements.txt
-
-      - uses: docker/login-action@v3
+      - uses: cloudflare/wrangler-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: frontend
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
+  manager:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --cwd manager
+      - run: bun --cwd manager run build
+      - uses: cloudflare/wrangler-action@v3
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      - name: Build and push Docker image
-        id: push
-        uses: docker/build-push-action@v6
-        with:
-          context: manager
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: manager

@@ -1,0 +1,32 @@
+// Beta deploy config: workers.dev URL, isolated KV namespace + R2 bucket.
+// Deploy: npx wrangler deploy --config wrangler.beta.jsonc
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "adult-gymnastics-events-manager-beta",
+  "main": "worker.js",
+  "compatibility_date": "2025-11-01",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // Without this, navigation requests to /login etc. are answered with
+    // index.html (SPA fallback) and the OAuth routes never run.
+    "run_worker_first": ["/login", "/callback", "/logout", "/api/*"]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "EVENTS",
+      "id": "c56fe9bfa2ab4495bf7eeea0bad6cd7b"
+    }
+  ],
+  // R2 not yet activated on the account; re-add once enabled:
+  // "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "adult-gymnastics-event-images-beta" }],
+  "r2_buckets": [],
+  // SUPERUSER_EMAIL, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are secrets, not
+  // config, so they stay out of this public repo. Secrets persist across
+  // deploys. The superuser can add further allowed users in the manager UI:
+  //   npx wrangler secret put SUPERUSER_EMAIL --config wrangler.beta.jsonc
+  //   npx wrangler secret put GOOGLE_CLIENT_ID --config wrangler.beta.jsonc
+  //   npx wrangler secret put GOOGLE_CLIENT_SECRET --config wrangler.beta.jsonc
+}

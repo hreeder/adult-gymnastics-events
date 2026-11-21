@@ -1,0 +1,276 @@
+/* Adult Gymnastics Events — hand-rolled, mobile-first, zero dependencies. */
+
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --ink: #1c1917;
+  --muted: #57534e;
+  --line: #e5e2dd;
+  --accent: #1a6b54;
+  --accent-ink: #14493c;
+  --accent-soft: #e9f2ee;
+  --ok-soft: #e5f3e8;
+  --ok-ink: #22693a;
+  --warn-soft: #fdf1dc;
+  --warn-ink: #8a5a12;
+  --off-soft: #ececea;
+  --off-ink: #55524e;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+.wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 16px 48px;
+}
+
+/* ---------- header ---------- */
+
+.site-header {
+  padding: 40px 0 20px;
+}
+
+h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- filters ---------- */
+
+.filter-toggle {
+  margin-top: 16px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: border-color 150ms;
+}
+
+.filter-toggle:hover {
+  border-color: var(--accent);
+}
+
+.filters {
+  margin: 16px 0 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  animation: reveal 150ms ease-out;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.filter-group {
+  border: 0;
+  margin: 0 0 12px;
+  padding: 0;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-group legend {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 150ms, background-color 150ms;
+}
+
+.pill:hover {
+  border-color: var(--accent);
+}
+
+.pill:has(input:checked) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.pill input {
+  accent-color: var(--accent);
+  margin: 0;
+}
+
+/* ---------- event list ---------- */
+
+.event {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 20px;
+  transition: border-color 150ms;
+}
+
+.event:hover {
+  border-color: #c9c4bc;
+}
+
+.event-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  background: var(--off-soft);
+}
+
+.event-body {
+  padding: 16px 18px 18px;
+}
+
+.event-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.event-meta {
+  margin: 4px 0 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.event-details :first-child {
+  margin-top: 0;
+}
+
+.event-details :last-child {
+  margin-bottom: 0;
+}
+
+.event-entries {
+  border-top: 1px solid var(--line);
+  padding: 10px 18px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* ---------- badges & pills ---------- */
+
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+.badge-open {
+  background: var(--ok-soft);
+  color: var(--ok-ink);
+}
+
+.badge-closing {
+  background: var(--warn-soft);
+  color: var(--warn-ink);
+}
+
+.badge-closed {
+  background: var(--off-soft);
+  color: var(--off-ink);
+}
+
+.discipline {
+  display: inline-block;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin: 0 6px 6px 0;
+}
+
+/* ---------- footer ---------- */
+
+.site-footer {
+  margin-top: 32px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.site-footer a {
+  color: inherit;
+}
+
+/* ---------- desktop ---------- */
+
+@media (min-width: 700px) {
+  .event {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+  }
+
+  .event-image {
+    height: 100%;
+    min-height: 200px;
+    aspect-ratio: auto;
+  }
+
+  .event-entries {
+    grid-column: 2;
+  }
+}
+
+/* ---------- links & focus ---------- */
+
+a {
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

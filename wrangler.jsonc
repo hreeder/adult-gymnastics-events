@@ -1,0 +1,12 @@
+// Guard config: running `wrangler deploy` from the repo root must fail fast
+// instead of auto-creating a config whose worker name defaults to this repo's
+// directory name ("adult-gymnastics-events") — which collides with the real
+// frontend worker and would let an accidental assets-only deploy overwrite it
+// (this happened once during migration). Deploys belong in frontend/ and
+// manager/, which have their own wrangler.jsonc. CI uses workingDirectory.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "do-not-deploy-from-repo-root",
+  "compatibility_date": "2026-11-01",
+  "main": "DO-NOT-DEPLOY-FROM-REPO-ROOT.js"
+}
