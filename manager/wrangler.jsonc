@@ -11,7 +11,8 @@
     "not_found_handling": "single-page-application",
     // Without this, navigation requests to /login etc. are answered with
     // index.html (SPA fallback) and the OAuth routes never run.
-    "run_worker_first": ["/login", "/callback", "/logout", "/api/*"]
+    // /event-images/* too, so the worker can serve R2 images for previews.
+    "run_worker_first": ["/login", "/callback", "/logout", "/api/*", "/event-images/*"]
   },
   "kv_namespaces": [
     {

@@ -240,7 +240,7 @@ function normalizeEvent(body) {
     event.details = body.details;
   }
   if (body.imageUrl != null) {
-    if (typeof body.imageUrl !== "string" || !/^\/event-images\/[\w.-]+$/.test(body.imageUrl)) {
+    if (typeof body.imageUrl !== "string" || !/^\/event-images\/[\w./-]+$/.test(body.imageUrl)) {
       return ["Invalid imageUrl."];
     }
     event.imageUrl = body.imageUrl;
@@ -293,7 +293,12 @@ async function handleApi(request, env, email, url, superuser) {
     return Response.json({ events: await readEvents(env) });
   }
 
-  const body = request.method === "POST" || request.method === "PUT" ? await request.json().catch(() => null) : null;
+  // /api/image is multipart — reading its body as JSON here would consume the
+  // stream and break the formData() call below.
+  const body =
+    path === "/api/image" ? null
+    : request.method === "POST" || request.method === "PUT" ? await request.json().catch(() => null)
+    : null;
 
   if (request.method === "POST" && path === "/api/events") {
     const [error, fields] = normalizeEvent(body);
@@ -392,6 +397,19 @@ export default {
       const email = await getSessionEmail(request, env);
       if (!email) return Response.json({ error: "Not authenticated." }, { status: 401 });
       return handleApi(request, env, email, url, isSuperuser(env, email));
+    }
+
+    // Serve uploaded images so previews in the manager UI work on this domain
+    // (the SPA fallback would otherwise answer with index.html).
+    if (url.pathname.startsWith("/event-images/")) {
+      const object = await env.IMAGES.get(url.pathname.slice(1));
+      if (object === null) return new Response("Not found", { status: 404 });
+      return new Response(object.body, {
+        headers: {
+          "content-type": object.httpMetadata?.contentType ?? "application/octet-stream",
+          "cache-control": "public, max-age=31536000, immutable", // keys are unique per upload
+        },
+      });
     }
 
     return env.ASSETS.fetch(request);
